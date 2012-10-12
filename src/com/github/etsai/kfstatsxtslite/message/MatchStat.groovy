@@ -19,7 +19,7 @@ public class MatchStat extends StatMessage {
         WIN, LOSS
     }
     
-    private final def mapName
+    private final def levelName
     private final def difficulty
     private final def length
     private final def elapsedTime
@@ -29,7 +29,7 @@ public class MatchStat extends StatMessage {
     public MatchStat(def parts) {
         super(parts[7])
         
-        mapName= parts[1].toLowerCase()
+        levelName= parts[1].toLowerCase()
         difficulty= parts[2]
         length= parts[3]
         elapsedTime= parts[4].toInteger()
@@ -47,8 +47,8 @@ public class MatchStat extends StatMessage {
         }
     }
     
-    public String getMapName() {
-        return mapName
+    public String getLevelName() {
+        return levelName
     }
     
     public String getDifficulty() {
