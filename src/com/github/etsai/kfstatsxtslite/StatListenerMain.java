@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,6 +26,7 @@ public class StatListenerMain {
         ClomParser clom= new ClomParser();
         DatagramSocket socket;
         DatagramPacket packet;
+        ExecutorService pool= Executors.newCachedThreadPool();
         
         clom.parse(args);
         
@@ -35,14 +38,11 @@ public class StatListenerMain {
         while(true) {
             try {
                 socket.receive(packet);
-                String data= new String(packet.getData());
+                StatMessage msg= StatMessage.parse(new String(packet.getData()));
                 
-                System.out.println(data);
             } catch (IOException ex) {
                 Logger.getLogger(StatListenerMain.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
-            
         }
     }
 }
