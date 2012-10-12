@@ -1,3 +1,8 @@
+# Netbeans directories
+dist/
+build/
+
+# Compiled byte code
 *.class
 
 # Package Files #
