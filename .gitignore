@@ -1,6 +1,7 @@
 # Netbeans directories
 dist/
 build/
+nbproject/private
 
 # Compiled byte code
 *.class
