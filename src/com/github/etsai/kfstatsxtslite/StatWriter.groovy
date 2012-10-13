@@ -5,8 +5,9 @@
 
 package com.github.etsai.kfstatsxtslite
 
-import groovy.sql.Sql
+import static com.github.etsai.kfstatsxtslite.message.PlayerStat.Result.*
 import com.github.etsai.kfstatsxtslite.message.*
+import groovy.sql.Sql
 
 /**
  * Writes the statistics to the database
@@ -54,18 +55,59 @@ public class StatWriter {
         def diffRow= sql.firstRow('select * from difficulties where id=${id}')
         def levelId= stat.getLevelName().hashCode()
         def levelRow= sql.firstRow('select * from levels where id=${id}')
+        def result= stat.getResult()
         
         sql.execute(difficultySql, [diffId, diffId, diffRow.name, diffId, diffRow.length, 
-            stat.getResult() == MatchStat.Result.WIN ? diffRow.wins + 1 : diffRow.wins,
-            stat.getResult() == MatchStat.Result.LOSS ? diffRow.losses + 1 : diffRow.losses,
+            result == MatchStat.Result.WIN ? diffRow.wins + 1 : diffRow.wins,
+            result == MatchStat.Result.LOSS ? diffRow.losses + 1 : diffRow.losses,
             diffRow.wave + stat.getWave(), new Time(stat.getElapsedTime()).add(diffRow.time)])
         sql.execute(levelSql, [levelId, levelId, levelRow.name, 
-            stat.getResult() == MatchStat.Result.WIN ? levelRow.wins + 1 : levelRow.wins,
-            stat.getResult() == MatchStat.Result.LOSS ? levelRow.losses + 1: levelRow.losses, 
+            result == MatchStat.Result.WIN ? levelRow.wins + 1 : levelRow.wins,
+            result == MatchStat.Result.LOSS ? levelRow.losses + 1: levelRow.losses, 
             new Time(stat.getElapsedTime()).add(levelRow.time)])
     }
     
     public void writePlayerStat(List<PlayerStat> stats) {
+        stats.each {stat ->
+            def category= stat.getCategory()
+            if (category != "match") {
+                def id= "${stat.getSteamID64()}-${category}".hashCode()
+                def row= sql.firstRow('select * from player where id=${id}')
+                def statValues= [:]
+                
+                row.category.tokenize(",").each {keyval ->
+                    def split= keyval.tokenize("=")
+                    statValues[split[0]]= split[1].toInteger()
+                }
+                stat.getStats().each {name, value ->
+                    def aggrId= "${name}-${category}".hashCode()
+                    def aggrRow= sql.firstRow('select * from aggregate id=${id}')
+                    
+                    if (statValues[name] == null) {
+                        statValues[name]= 0
+                    }
+                    statValues[name]+= value
+                    sql.execute(aggregateSql, [aggrId, aggrId, aggrRow.stat, 
+                        aggrRow.value + value, aggrId, aggrRow.category])
+                }
+                
+                def updatedValues= []
+                statValues.each {name, value ->
+                    updatedValues << "${name}=${value}"
+                }
+                sql.execute(playerSql, [id, id, stat.getSteamID64(), updatedValues.join(","),
+                    id, category])
+            } else {
+                def id= stat.getSteamID64().hashCode()
+                def row= sql.firstRow('select * from records where id=${id}')
+                def result= stat.getResult()
+                
+                sql.execute(recordSql, [id, id, stat.getSteamID64(), 
+                    result == WIN ? row.wins + 1 : row.wins, 
+                    result == LOSS ? row.losses + 1 : row.losses, 
+                    result == DISCONNECT ? row.disconnects + 1 : row.disconnects])
+            }
+        }
         throw new UnsupportedOperationException("Not yet implemented")
     }
 }
