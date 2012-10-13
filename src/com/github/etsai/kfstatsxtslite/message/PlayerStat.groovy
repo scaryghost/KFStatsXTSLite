@@ -26,21 +26,23 @@ public class PlayerStat extends StatMessage {
     public PlayerStat(def parts) {
         super((parts[3] == "match") ? "" : parts[4])
         
-        steamID64 parts[1]
+        steamID64= parts[1]
         category= parts[3]
         
-        switch(parts[7].toInteger()) {
-            case 0:
-                result= DISCONNECT
-                break
-            case 1:
-                result= LOSS
-                break
-            case 2:
-                result= WIN
-                break
-            default:
-                throw new RuntimeException("Unrecognized result: ${parts[7]}")
+        if (category == "match") {
+            switch(parts[7].toInteger()) {
+                case 0:
+                    result= Result.DISCONNECT
+                    break
+                case 1:
+                    result= Result.LOSS
+                    break
+                case 2:
+                    result= Result.WIN
+                    break
+                default:
+                    throw new RuntimeException("Unrecognized result: ${parts[7]}")
+            }
         }
     }
     

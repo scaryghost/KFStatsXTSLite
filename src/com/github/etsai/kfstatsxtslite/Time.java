@@ -78,15 +78,17 @@ public class Time {
     /**
      * Adds the string representation of t2 into the calling object
      * @param t2 Time offset in the form "D days HH:MM:SS"
+     * @return Reference to the calling object
      */
-    public void add(String t2) {
-        add(new Time(t2));
+    public Time add(String t2) {
+        return add(new Time(t2));
     }
     /**
      * Adds the values of t2 into the calling object
      * @param t2 Time offset to add
+     * @return Reference to the calling object
      */
-    public void add(Time t2) {
+    public Time add(Time t2) {
         seconds+= t2.seconds;
         minutes+= (seconds / 60) + t2.minutes;
         seconds%= 60;
@@ -94,6 +96,8 @@ public class Time {
         minutes%= 60;
         days+= (hours / 24) + t2.days;
         hours%= 24;
+        
+        return this;
     }
     
     /**

@@ -17,13 +17,13 @@ public abstract class StatMessage {
         MATCH, PLAYER
     }
     
-    private def msgType
-    private def seqNo
-    private def close
-    private def stats
+    protected def msgType
+    protected def seqNo
+    protected def close
+    protected def stats
     
     public static StatMessage parse(String msg) {
-        def parts= msg.tokenize("|")
+        def parts= msg.split("\\|")
         def packetInfo= parts[0].tokenize(",")
         def message
         
@@ -33,18 +33,19 @@ public abstract class StatMessage {
                     throw new RuntimeException("Player protocol is incorrect version.  Received ${packetInfo[1]}, expecting ${PlayerStat.VERSION}")
                 message= new PlayerStat(parts)
                 message.msgType= Type.PLAYER
+                message.seqNo= parts[2].toInteger()
                 break;
             case MatchStat.PROTOCOL:
                 if (packetInfo[1].toInteger() != MatchStat.VERSION)
                     throw new RuntimeException("Match protocol is incorrect version.  Received ${packetInfo[1]}, expecting ${MatchStat.VERSION}")
                 message= new MatchStat(parts)
                 message.msgType= Type.MATCH
+                message.seqNo= 0
                 break;
             default:
                 throw new RuntimeException("Unrecognized message type: ${packetInfo[0]}")
                     
         }
-        message.seqNo= parts[2].toInteger()
         message.close= parts.last() == "_close"
         return message
     }
@@ -69,7 +70,7 @@ public abstract class StatMessage {
     }
     
     public Map<String, Integer> getStats() {
-        return Collections.unmodifiableMap(stats)
+        return stats
     }
 }
 

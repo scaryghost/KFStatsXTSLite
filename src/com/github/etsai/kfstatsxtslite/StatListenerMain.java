@@ -32,13 +32,12 @@ public class StatListenerMain {
         ClomParser clom= new ClomParser();
         DatagramSocket socket;
         DatagramPacket packet;
-        ExecutorService pool= Executors.newCachedThreadPool();
         
         clom.parse(args);
         Class.forName("org.sqlite.JDBC");
         
         Map<String, PlayerContent> receivedContent= new HashMap<>();
-        StatWriter writer= new StatWriter(Sql.newInstance(String.format("jdbc:sqlite:%s"), clom.getDBName()));
+        StatWriter writer= new StatWriter(Sql.newInstance(String.format("jdbc:sqlite:%s", clom.getDBName())));
         byte[] buffer= new byte[65536];
         socket= new DatagramSocket(clom.getPort());
         packet= new DatagramPacket(buffer, buffer.length);
@@ -48,7 +47,7 @@ public class StatListenerMain {
         while(true) {
             try {
                 socket.receive(packet);
-                StatMessage msg= StatMessage.parse(new String(packet.getData()));
+                StatMessage msg= StatMessage.parse(new String(packet.getData(), 0, packet.getLength()));
                 
                 switch (msg.getType()) {
                     case MATCH:
@@ -65,6 +64,7 @@ public class StatListenerMain {
                         content= receivedContent.get(steamID64);
                         content.addPlayerStat(playerMsg);
                         if (content.isComplete()) {
+                            System.out.println("Saving stats for: " + steamID64);
                             writer.writePlayerStat(content.getStats());
                             receivedContent.remove(steamID64);
                         }

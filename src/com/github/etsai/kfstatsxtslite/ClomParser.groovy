@@ -53,7 +53,7 @@ public class ClomParser {
      * @return Database name
      */
     public String getDBName() {
-        return options.dbpath
+        return options.dbname
     }
 }
 

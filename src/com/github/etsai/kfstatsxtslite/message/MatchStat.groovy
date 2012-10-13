@@ -12,7 +12,7 @@ import com.github.etsai.kfstatsxtslite.StatMessage
  * @author etsai
  */
 public class MatchStat extends StatMessage {
-    public static String PROTOCOL= "kstatsx-match"
+    public static String PROTOCOL= "kfstatsx-match"
     public static Integer VERSION= 1
     
     public enum Result {
@@ -37,10 +37,10 @@ public class MatchStat extends StatMessage {
         
         switch (parts[5]) {
             case "1":
-                result= LOSS
+                result= Result.LOSS
                 break
             case "2":
-                result= WIN
+                result= Result.WIN
                 break
             default:
                 throw new RuntimeException("Unrecognized result value: ${parts[5]}")
