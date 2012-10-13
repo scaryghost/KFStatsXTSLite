@@ -18,6 +18,7 @@ public class PlayerStat extends StatMessage {
     
     public static String PROTOCOL= "kfstatsx-player"
     public static Integer VERSION= 1
+    public static Long linuxOffset= 76561197960265728
     
     private final def steamID64
     private final def category
@@ -27,6 +28,9 @@ public class PlayerStat extends StatMessage {
         super((parts[3] == "match") ? "" : parts[4])
         
         steamID64= parts[1]
+        if (steamID64.length() < 17) {
+            steamID64= (steamID64.toLong() + linuxOffset).toString()
+        }
         category= parts[3]
         
         if (category == "match") {
