@@ -67,7 +67,7 @@ public class StatWriter {
             new Time(stat.getElapsedTime()).add(levelRow.time)])
     }
     
-    public void writePlayerStat(List<PlayerStat> stats) {
+    public void writePlayerStat(Iterable<PlayerStat> stats) {
         stats.each {stat ->
             def category= stat.getCategory()
             if (category != "match") {

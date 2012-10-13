@@ -5,13 +5,15 @@
 package com.github.etsai.kfstatsxtslite;
 
 import static com.github.etsai.kfstatsxtslite.StatMessage.Type.*;
-import com.github.etsai.kfstatsxtslite.message.MatchStat;
+import com.github.etsai.kfstatsxtslite.message.*;
 import groovy.sql.Sql;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -35,10 +37,12 @@ public class StatListenerMain {
         clom.parse(args);
         Class.forName("org.sqlite.JDBC");
         
+        Map<String, PlayerContent> receivedContent= new HashMap<>();
         StatWriter writer= new StatWriter(Sql.newInstance(String.format("jdbc:sqlite:%s"), clom.getDBName()));
         byte[] buffer= new byte[65536];
         socket= new DatagramSocket(clom.getPort());
         packet= new DatagramPacket(buffer, buffer.length);
+        
         
         System.out.println("Listening on port: "+clom.getPort());
         while(true) {
@@ -51,6 +55,19 @@ public class StatListenerMain {
                         writer.writeMatchStat((MatchStat)msg);
                         break;
                     case PLAYER:
+                        PlayerStat playerMsg= (PlayerStat)msg;
+                        String steamID64= playerMsg.getSteamID64();
+                        PlayerContent content;
+                        
+                        if (!receivedContent.containsKey(steamID64)) {
+                            receivedContent.put(steamID64, new PlayerContent());
+                        }
+                        content= receivedContent.get(steamID64);
+                        content.addPlayerStat(playerMsg);
+                        if (content.isComplete()) {
+                            writer.writePlayerStat(content.getStats());
+                            receivedContent.remove(steamID64);
+                        }
                         break;
                 }
                 
