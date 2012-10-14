@@ -24,19 +24,15 @@ public class StatWriter {
         def deaths= stat.getStats();
         deaths.each {name, count ->
             def id= name.hashCode()
-            def row= sql.firstRow("select * from deaths where id=$id")
             
-            if (row == null) {
-                sql.execute("insert into deaths values(?, ?, ?)", [id, name, count])
-            } else {
-                sql.execute("update deaths set count=? where id=?", [count + row.count, id])
-            }
+            sql.execute("insert or ignore into deaths values ($id, $name, 0);")
+            sql.execute("update deaths set count= count + $count where id=$id")
         }
         
         def diffId= "${stat.getDifficulty()}-${stat.getLength()}".hashCode()
-        def diffRow= sql.firstRow("select * from difficulties where id=$diffId")
+        def diffRow= sql.firstRow("select time from difficulties where id=$diffId")
         def levelId= stat.getLevelName().hashCode()
-        def levelRow= sql.firstRow("select * from levels where id=$levelId")
+        def levelRow= sql.firstRow("select time from levels where id=$levelId")
         def result= stat.getResult()
         def elapsedTime= new Time(stat.getElapsedTime())
         
@@ -46,10 +42,10 @@ public class StatWriter {
                 result == MatchStat.Result.WIN ? 1 : 0,
                 result == MatchStat.Result.LOSS ? 1 : 0, stat.getWave(), elapsedTime])
         } else {
-            sql.execute("update difficulties set wins=?, losses=?, wave=?, time=? where id=?", [
-                result == MatchStat.Result.WIN ? diffRow.wins + 1 : diffRow.wins, 
-                result == MatchStat.Result.LOSS ? diffRow.losses + 1 : diffRow.losses,
-                diffRow.wave + stat.getWave(), elapsedTime.add(diffRow.time), diffId
+            sql.execute("update difficulties set wins=wins + ?, losses=losses + ?, wave=wave + ?, time=? where id=?", [
+                result == MatchStat.Result.WIN ? 1 : 0, 
+                result == MatchStat.Result.LOSS ? 1 : 0,
+                stat.getWave(), elapsedTime.add(diffRow.time), diffId
             ])
         }
         
@@ -60,21 +56,21 @@ public class StatWriter {
                 result == MatchStat.Result.LOSS ? 1 : 0, elapsedTime
             ])
         } else {
-            sql.execute("update levels set wins=?, losses=?, time=? where id=?", [
-                result == MatchStat.Result.WIN ? levelRow.wins + 1 : levelRow.wins,
-                result == MatchStat.Result.LOSS ? levelRow.losses + 1: levelRow.losses, 
-                elapsedTime.add(levelRow.time),
-                levelId
+            sql.execute("update levels set wins=wins + ?, losses=losses + ?, time=? where id=?", [
+                result == MatchStat.Result.WIN ? 1 : 0,
+                result == MatchStat.Result.LOSS ? 1 : 0, 
+                elapsedTime.add(levelRow.time), levelId
             ])
         }
     }
     
     public void writePlayerStat(Iterable<PlayerStat> stats) {
+        def start= System.nanoTime()
         stats.each {stat ->
             def category= stat.getCategory()
             if (category != "match") {
                 def playerId= "${stat.getSteamID64()}-${category}".hashCode()
-                def row= sql.firstRow("select * from player where id=$playerId")
+                def row= sql.firstRow("select stats from player where id=$playerId")
                 def statValues= [:]
                 
                 if (row != null) {
@@ -85,22 +81,14 @@ public class StatWriter {
                 }
                 stat.getStats().each {name, value ->
                     def aggrId= "${name}-${category}".hashCode()
-                    def aggrRow= sql.firstRow("select * from aggregate where id=$aggrId")
                     
                     if (statValues[name] == null) {
                         statValues[name]= 0
                     }
                     statValues[name]+= value
                     
-                    if (aggrRow == null) {
-                        sql.execute("insert into aggregate values (?, ?, ?, ?)", [
-                            aggrId, name, value, category
-                        ])
-                    } else {
-                        sql.execute("update aggregate set value=? where id=?", [
-                            aggrRow.value + value, aggrId
-                        ])
-                    }
+                    sql.execute("insert or ignore into aggregate values ($aggrId, $name, 0, $category);")
+                    sql.execute("update aggregate set value= value + $value where id=$aggrId")
                 }
                 
                 def updatedValues= []
@@ -119,26 +107,17 @@ public class StatWriter {
                 }
             } else {
                 def id= stat.getSteamID64().hashCode()
-                def row= sql.firstRow("select * from records where id=${id}")
                 def result= stat.getResult()
                 
-                if (row == null) {
-                    sql.execute("insert into records values(?, ?, ?, ?, ?)", [
-                        id, stat.getSteamID64(),
-                        result == WIN ? 1 : 0,
-                        result == LOSS ? 1 : 0, 
-                        result == DISCONNECT ? 1 : 0
-                    ])
-                } else {
-                    sql.execute("update records set wins=?, losses=?, disconnects=? where id=?", [
-                        result == WIN ? row.wins + 1 : row.wins, 
-                        result == LOSS ? row.losses + 1 : row.losses, 
-                        result == DISCONNECT ? row.disconnects + 1 : row.disconnects,
-                        id
-                    ])
-                }
+                sql.execute("insert or ignore into records values ($id, ${stat.getSteamID64()}, 0, 0, 0);")
+                sql.execute("update records set wins= wins + ?, losses= losses + ?, disconnects= disconnects + ? where id=$id", [
+                    result == WIN ? 1 : 0,
+                    result == LOSS ? 1 : 0, 
+                    result == DISCONNECT ? 1 : 0
+                ])
             }
         }
+        println System.nanoTime() - start
     }
 }
 
