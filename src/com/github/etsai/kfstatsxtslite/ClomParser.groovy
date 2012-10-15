@@ -18,7 +18,9 @@ public class ClomParser {
      */
     public ClomParser() {
         cli= new CliBuilder(usage: './startlistener [options]')
-        cli.dbname(args:1, argName:'path', required:true, 'sqlitedb to use')
+        cli.dburl(args:1, argName:'url', required:true, 'url to the remote database')
+        cli.dbuser(args:1, argName:'name', 'user name to log into the database')
+        cli.dbpassword(args:1, argName:'pwd', 'login password for the database')
         cli.port(args:1, argName:'no', 'udp port to listen for stat packets')
         cli.h(longOpt:'help', 'displays this help message')
     }
@@ -48,12 +50,32 @@ public class ClomParser {
         return 6000
     }
     /**
-     * Get the database name given by -dbname.  This is a required command 
+     * Get the url to the remote database.  This is a required command
      * line option
-     * @return Database name
+     * @return Database url
      */
-    public String getDBName() {
-        return options.dbname
+    public String getDbURL() {
+        return options.dburl
+    }
+    /**
+     * Get the user name for the database login.  User name is specified by 
+     * the -dbuser option.  If no user name is specified, null is returned
+     * @return Database user name login or null if none is given
+     */
+    public String getDbUser() {
+        if (options.dbuser)
+            return options.dbuser
+        return null
+    }
+    /**
+     * Get the password for the dadtabase login.  Password is specified by 
+     * the -dbpassword option.  If no password is specified, null is returned
+     * @return Database password login or null if none is given
+     */
+    public String getDbPassword() {
+        if (options.dbpassword)
+            return options.dbpassword
+        return null
     }
 }
 

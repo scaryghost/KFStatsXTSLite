@@ -14,8 +14,6 @@ import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,7 +26,7 @@ public class StatListenerMain {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws SocketException, ClassNotFoundException, SQLException {
+    public static void main(String[] args) throws SocketException, SQLException {
         ClomParser clom= new ClomParser();
         DatagramSocket socket;
         DatagramPacket packet;
@@ -36,7 +34,7 @@ public class StatListenerMain {
         clom.parse(args);
         
         Map<String, PlayerContent> receivedContent= new HashMap<>();
-        StatWriter writer= new StatWriter(Sql.newInstance("jdbc:mysql://192.168.1.121:3306/kfstatsx", "kfstatsx", "Ch0coc4t"));
+        StatWriter writer= new StatWriter(Sql.newInstance(clom.getDbURL(), clom.getDbUser(), clom.getDbPassword()));
         byte[] buffer= new byte[65536];
         socket= new DatagramSocket(clom.getPort());
         packet= new DatagramPacket(buffer, buffer.length);
