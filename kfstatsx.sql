@@ -14,7 +14,7 @@ CREATE  TABLE `records` (
   `disconnects` SMALLINT UNSIGNED NOT NULL DEFAULT 0 ,
   PRIMARY KEY (`id`) ,
   UNIQUE INDEX `steamID64_UNIQUE` (`steamID64` ASC) )
-COMMENT = 'Players\' win, loss, and disconnect records';
+COMMENT = 'Stores win, loss, and disconnect records for the players';
 
 CREATE  TABLE `aggregate` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
