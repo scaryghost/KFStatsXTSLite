@@ -34,10 +34,9 @@ public class StatListenerMain {
         DatagramPacket packet;
         
         clom.parse(args);
-        Class.forName("org.sqlite.JDBC");
         
         Map<String, PlayerContent> receivedContent= new HashMap<>();
-        StatWriter writer= new StatWriter(Sql.newInstance(String.format("jdbc:sqlite:%s", clom.getDBName())));
+        StatWriter writer= new StatWriter(Sql.newInstance("jdbc:mysql://192.168.1.121:3306/kfstatsx", "kfstatsx", "Ch0coc4t"));
         byte[] buffer= new byte[65536];
         socket= new DatagramSocket(clom.getPort());
         packet= new DatagramPacket(buffer, buffer.length);

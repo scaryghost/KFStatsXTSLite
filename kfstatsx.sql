@@ -25,7 +25,7 @@ CREATE  TABLE `aggregate` (
   UNIQUE INDEX `stat_group_UNIQUE` USING HASH (`stat` ASC, `group` ASC))
 COMMENT = 'Stores the sum of each stat over all players';
 
-CREATE  TABLE `difficulty` (
+CREATE  TABLE `difficulties` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(45) NOT NULL ,
   `length` VARCHAR(45) NOT NULL ,
@@ -62,11 +62,11 @@ CREATE PROCEDURE `update_difficulty_and_level`
     (diffname VARCHAR(45), length VARCHAR(45), levelname VARCHAR(45), 
 wins SMALLINT UNSIGNED, losses SMALLINT UNSIGNED, wave INT UNSIGNED, time INT UNSIGNED)
 BEGIN
-INSERT INTO difficulty values (NULL, diffname, length, wins, losses, wave, time)
+INSERT INTO difficulties values (NULL, diffname, length, wins, losses, wave, time)
     ON DUPLICATE KEY UPDATE `wins`= `wins` + wins, `losses`= `losses` + losses, 
     `wave`= `wave` + wave, `time`= `time` + time;
 
-INSERT INTO level values (NULL, levelname, wins, losses, time)
+INSERT INTO levels values (NULL, levelname, wins, losses, time)
     ON DUPLICATE KEY UPDATE  `wins`= `wins` + wins, `losses`= `losses` + losses,
     `time`= `time` + time;
 END$$
@@ -77,10 +77,10 @@ DELIMITER $$
 CREATE PROCEDURE `update_player_aggregate` 
     (steamID64 VARCHAR(45), stat VARCHAR(45), offset INT UNSIGNED, statgroup VARCHAR(45))
 BEGIN
-INSERT INTO player values (steamID64, stat, offset, statgroup)
+INSERT INTO player values (NULL, steamID64, stat, offset, statgroup)
     ON DUPLICATE KEY UPDATE value= value + offset;
 
-INSERT INTO aggregate values (stat, offset, statgroup)
+INSERT INTO aggregate values (NULL, stat, offset, statgroup)
     ON DUPLICATE KEY UPDATE value= value + offset;
 END$$
 DELIMITER ;
@@ -91,7 +91,7 @@ CREATE PROCEDURE `update_record`
     (steamID64 VARCHAR(45), wins SMALLINT UNSIGNED, losses SMALLINT UNSIGNED,
     disconnects SMALLINT UNSIGNED)
 BEGIN
-INSERT INTO records VALUES(steamID64, wins, losses, disconnects)
+INSERT INTO records VALUES(NULL, steamID64, wins, losses, disconnects)
     ON DUPLICATE KEY UPDATE `wins`= `wins` + wins, `losses`= `losses` + losses,
     `disconnects`= `disconnects` + disconnects;
 END$$
@@ -101,7 +101,7 @@ DROP procedure IF EXISTS `update_deaths`;
 DELIMITER $$
 CREATE PROCEDURE `update_deaths` (name VARCHAR(45), offset SMALLINT UNSIGNED)
 BEGIN
-INSERT INTO deaths VALUES (name, count)
+INSERT INTO deaths VALUES (NULL, name, offset)
     ON DUPLICATE KEY UPDATE count= count + offset;
 
 END$$
