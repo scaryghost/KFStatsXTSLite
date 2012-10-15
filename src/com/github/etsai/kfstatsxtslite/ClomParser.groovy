@@ -45,7 +45,7 @@ public class ClomParser {
      */
     public Integer getPort() {
         if (options.port) {
-            return options.port;
+            return options.port.toInteger();
         }
         return 6000
     }
