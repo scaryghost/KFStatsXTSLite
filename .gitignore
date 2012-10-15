@@ -1,3 +1,6 @@
+# VI tmp files
+*.swp
+
 # Netbeans directories
 dist/
 build/
