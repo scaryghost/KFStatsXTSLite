@@ -71,4 +71,23 @@
     nbproject/build-impl.xml file. 
 
     -->
+    
+    <condition property="isUnix">
+        <os family="unix"/>
+    </condition>
+    
+    <target name="-pre-init" depends="override-properties-unix" />
+    <target name="override-properties-unix" if="isUnix">
+        <property environment="env" />
+        <fail unless="env.JAVA_LIBS">JAVA_LIBS env variable must be set</fail>
+        <fail unless="env.GROOVY_HOME">GROOVY_HOME env variable must be set</fail>
+        <property name="user.properties.file" value="linux_build.properties" />
+    </target>
+
+    <target name="-post-jar">
+        <copy todir="${dist.dir}/http" >
+            <fileset dir="${src.dir}/http" />
+        </copy>
+    </target>
+
 </project>
