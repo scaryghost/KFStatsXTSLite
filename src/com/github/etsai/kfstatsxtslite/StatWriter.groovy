@@ -5,7 +5,7 @@
 
 package com.github.etsai.kfstatsxtslite
 
-import static com.github.etsai.kfstatsxtslite.message.PlayerStat.Result.*
+import static com.github.etsai.kfstatsxtslite.message.PlayerStat.MatchInfo.Result.*
 import com.github.etsai.kfstatsxtslite.message.*
 import groovy.sql.Sql
 
@@ -21,17 +21,17 @@ public class StatWriter {
     }
     
     public void writeMatchStat(MatchStat stat) {
-        def result= stat.getResult()
-        def deaths= stat.getStats()
-        deaths.each {name, count ->
+        stat.getStats().each {name, count ->
             sql.execute("call update_deaths($name, $count);")
         }
         
-        sql.execute("call update_difficulty_and_level(?, ?, ?, ?, ?, ?, ?)", [
-            stat.getDifficulty(), stat.getLength(), stat.getLevelName(), 
-            result == MatchStat.Result.WIN ? 1 : 0,
-            result == MatchStat.Result.LOSS ? 1 : 0, stat.getWave(), stat.getElapsedTime()
+        def result= stat.getResult()
+        def wins= (result == MatchStat.Result.WIN) ? 1 : 0
+        def losses= (result == MatchStat.Result.WIN) ? 1 : 0
+        sql.execute("call update_difficulty(?, ?, ?, ?, ?, ?)", [
+            stat.getDifficulty(), stat.getLength(), wins, losses, stat.getWave(), stat.getElapsedTime()
         ])
+        sql.execute("call update_level(${stat.getLevelName()}, $wins, $losses, ${stat.getElapsedTime()})")
     }
     
     public void writePlayerStat(Iterable<PlayerStat> stats) {
@@ -46,12 +46,17 @@ public class StatWriter {
                     ])
                 }
             } else {
-                def result= stat.getResult()
+                def matchInfo= stat.getMatchInfo()
                 
                 sql.execute("call update_record(?, ?, ?, ?)", [
-                    id, result == WIN ? 1 : 0,
-                    result == LOSS ? 1 : 0, 
-                    result == DISCONNECT ? 1 : 0
+                    id, matchInfo.result == WIN ? 1 : 0,
+                    matchInfo.result == LOSS ? 1 : 0, 
+                    matchInfo.result == DISCONNECT ? 1 : 0
+                ])
+
+                sql.execute("call insert_session(?, ?, ?, ?, ?, ?)", [
+                    id, matchInfo.level, matchInfo.difficulty, matchInfo.length, 
+                    matchInfo.result.toString().toLowerCase(), matchInfo.wave
                 ])
             }
         }

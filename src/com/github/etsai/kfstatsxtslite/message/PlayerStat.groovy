@@ -12,8 +12,16 @@ import com.github.etsai.kfstatsxtslite.StatMessage
  * @author etsai
  */
 public class PlayerStat extends StatMessage {
-    public enum Result {
-        WIN, LOSS, DISCONNECT
+    static class MatchInfo {
+        public enum Result {
+            WIN, LOSS, DISCONNECT
+        }
+
+        public def level
+        public def difficulty
+        public def length
+        public def wave
+        public def result
     }
     
     public static String PROTOCOL= "kfstatsx-player"
@@ -22,7 +30,7 @@ public class PlayerStat extends StatMessage {
     
     private final def steamID64
     private final def category
-    private final def result
+    private final def matchInfo
     
     public PlayerStat(def parts) {
         super((parts[3] == "match") ? "" : parts[4])
@@ -34,15 +42,18 @@ public class PlayerStat extends StatMessage {
         category= parts[3]
         
         if (category == "match") {
+            matchInfo= new MatchInfo(level: parts[4].toLowerCase(), difficulty: parts[5], 
+                length: parts[6], wave: parts[8].toInteger())
+
             switch(parts[7].toInteger()) {
                 case 0:
-                    result= Result.DISCONNECT
+                    matchInfo.result= MatchInfo.Result.DISCONNECT
                     break
                 case 1:
-                    result= Result.LOSS
+                    matchInfo.result= MatchInfo.Result.LOSS
                     break
                 case 2:
-                    result= Result.WIN
+                    matchInfo.result= MatchInfo.Result.WIN
                     break
                 default:
                     throw new RuntimeException("Unrecognized result: ${parts[7]}")
@@ -58,8 +69,8 @@ public class PlayerStat extends StatMessage {
         return category
     }
     
-    public Result getResult() {
-        return result
+    public MatchInfo getMatchInfo() {
+        return matchInfo
     }
 }
 

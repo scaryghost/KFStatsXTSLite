@@ -56,15 +56,32 @@ CREATE  TABLE `player` (
   UNIQUE INDEX `steamID64_category_stat_UNIQUE` USING HASH (`steamID64` ASC, `category` ASC, `stat` ASC)) 
 COMMENT = 'Stores individual player statistics';
 
+CREATE  TABLE `sessions` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `steamID64` VARCHAR(45) NOT NULL ,
+  `level` VARCHAR(45) NOT NULL ,
+  `difficulty` VARCHAR(45) NOT NULL ,
+  `length` VARCHAR(45) NOT NULL ,
+  `result` VARCHAR(45) NOT NULL ,
+  `wave` TINYINT UNSIGNED NOT NULL ,
+  `time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  PRIMARY KEY (`id`) ,
+  UNIQUE INDEX `steamID64_time_UNIQUE` USING HASH (`steamID64` ASC, `time` ASC) )
+COMMENT = 'Keeps a history of every game played by each player';
+
 DELIMITER $$
-CREATE PROCEDURE `update_difficulty_and_level` 
-    (diffname VARCHAR(45), length VARCHAR(45), levelname VARCHAR(45), 
-winDelta SMALLINT UNSIGNED, lossDelta SMALLINT UNSIGNED, waveDelta INT UNSIGNED, timeDelta INT UNSIGNED)
+CREATE PROCEDURE `update_difficulty` 
+    (diffname VARCHAR(45), length VARCHAR(45), winDelta SMALLINT UNSIGNED, lossDelta SMALLINT UNSIGNED, 
+        waveDelta INT UNSIGNED, timeDelta INT UNSIGNED)
 BEGIN
 INSERT INTO difficulties values (NULL, diffname, length, winDelta, lossDelta, waveDelta, timeDelta)
     ON DUPLICATE KEY UPDATE wins= wins + winDelta, losses= losses + lossDelta, 
     wave= wave + waveDelta, time= time + timeDelta;
+END$$
 
+CREATE PROCEDURE `update_level` 
+    (levelname VARCHAR(45), winDelta SMALLINT UNSIGNED, lossDelta SMALLINT UNSIGNED, timeDelta INT UNSIGNED)
+BEGIN
 INSERT INTO levels values (NULL, levelname, winDelta, lossDelta, timeDelta)
     ON DUPLICATE KEY UPDATE  wins= wins + winDelta, losses= losses + lossDelta,
     time= time + timeDelta;
@@ -93,5 +110,11 @@ CREATE PROCEDURE `update_deaths` (name VARCHAR(45), offset SMALLINT UNSIGNED)
 BEGIN
 INSERT INTO deaths VALUES (NULL, name, offset)
     ON DUPLICATE KEY UPDATE count= count + offset;
+END$$
+
+CREATE PROCEDURE `insert_session` (steamID64 VARCHAR(45), level VARCHAR(45), 
+    difficulty VARCHAR(45), length VARCHAR(45), result VARCHAR(45), wave TINYINT UNSIGNED)
+BEGIN
+INSERT INTO sessions VALUES(NULL, steamID64, level, difficulty, length, result, wave, NULL);
 END$$
 DELIMITER ;
