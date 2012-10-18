@@ -2,7 +2,7 @@
 
 #### USER SETTINGS ####
 
-sqliteDB=kfstatsx.sqlite
+sqliteDB=kfsxdb.sqlite
 mysqlURL=localhost:3306/kfstatsx
 mysqlUser=kfstatsx
 mysqlPwd=server
