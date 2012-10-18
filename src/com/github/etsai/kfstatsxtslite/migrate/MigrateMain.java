@@ -37,8 +37,11 @@ public class MigrateMain {
     
     static long timeStrToSeconds(String timeStr) {
         Matcher matcher= timePat.matcher(timeStr);
-        return Integer.valueOf(matcher.group(4)) + Integer.valueOf(matcher.group(3)) * 60 + 
-                    Integer.valueOf(matcher.group(2)) * 3600 + Integer.valueOf(matcher.group(1)) * 86400;
+        if (matcher.matches()) {
+            return Integer.valueOf(matcher.group(4)) + Integer.valueOf(matcher.group(3)) * 60 + 
+                        Integer.valueOf(matcher.group(2)) * 3600 + Integer.valueOf(matcher.group(1)) * 86400;
+        }
+        return -1;
     }
     static void move(Statement srcSt, Statement dstSt) throws SQLException {
         ResultSet rs;
