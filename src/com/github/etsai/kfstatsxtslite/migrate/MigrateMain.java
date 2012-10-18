@@ -23,10 +23,14 @@ public class MigrateMain {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
+        if (args.length != 4) {
+            System.err.println("Usage: migrate [sqlite url] [mysql url] [mysql user name] [mysql password]");
+            System.exit(1);
+        }
+        
         Class.forName("org.sqlite.JDBC");
-        Connection src= DriverManager.getConnection("jdcb:sqlite:kfstatsx.sqlite");
-        Connection dst= DriverManager.getConnection("jdbc:mysql://192.168.1.121:3306/kfstatsx", 
-                "kfstatsx", "Ch0coc4t");
+        Connection src= DriverManager.getConnection(args[0]);
+        Connection dst= DriverManager.getConnection(args[1], args[2], args[3]);
         
         move(src.createStatement(), dst.createStatement());
     }
