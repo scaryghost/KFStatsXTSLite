@@ -68,15 +68,19 @@ public class StatListenerMain {
                     String steamID64= playerMsg.getSteamID64();
                     PlayerContent content;
 
-                    if (!receivedContent.containsKey(steamID64)) {
-                        receivedContent.put(steamID64, new PlayerContent());
+                    synchronized(receivedContent) {
+                        if (!receivedContent.containsKey(steamID64)) {
+                            receivedContent.put(steamID64, new PlayerContent());
+                        }
+                        content= receivedContent.get(steamID64);
                     }
-                    content= receivedContent.get(steamID64);
                     content.addPlayerStat(playerMsg);
                     if (content.isComplete()) {
+                        synchronized(receivedContent) {
+                            receivedContent.remove(steamID64);
+                        }
                         System.out.println("Saving stats for: " + steamID64);
                         writer.writePlayerStat(content.getStats());
-                        receivedContent.remove(steamID64);
                     }
                 }
             } catch (Exception ex) {
