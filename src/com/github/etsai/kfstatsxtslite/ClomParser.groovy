@@ -17,13 +17,15 @@ public class ClomParser {
      * Default constructor
      */
     public ClomParser() {
-        cli= new CliBuilder(usage: './startlistener [options]')
+        cli= new CliBuilder(usage: 'java -jar dist/KFStatsXTSLite.jar [options]')
         cli.dburl(args:1, argName:'url', required:true, 'url to the remote database')
         cli.dbuser(args:1, argName:'name', 'user name to log into the database')
-        cli.dbpassword(args:1, argName:'pwd', 'login password for the database')
+        cli.dbpwd(args:1, argName:'password', 'login password for the database')
         cli.port(args:1, argName:'no', 'udp port to listen for stat packets')
         cli.h(longOpt:'help', 'displays this help message')
         cli.v(longOpt:'version', 'prints the version and exits')
+        cli.pwd(args:1, argName:'password', required:true, 'password that udp packets must have to be accepted by the server')
+        cli.log('enable logging')
     }
     
     /**
@@ -31,7 +33,7 @@ public class ClomParser {
      */
     public void parse(String[] args) {
         if (args.contains("-v") || args.contains("--version")) {
-            println "KFStatsxTSLite - Version: ${Version.gitTag}"
+            println "KFStatsXTSLite - Version: ${Version.gitTag}"
             System.exit(0)
         } else if (args.contains("-h") || args.contains("--help")) {
             cli.usage()
@@ -43,6 +45,7 @@ public class ClomParser {
             System.exit(1)
         }
     }
+
     /**
      * Get the udp port to use.  If -port was not used, return default value 
      * of 6000.
@@ -54,6 +57,21 @@ public class ClomParser {
         }
         return 6000
     }
+    /**
+     * Get the server password, specified by the -pwd option.  This is a required option
+     * @return Server passwprd
+     */
+    public String getServerPassword() {
+        return options.pwd
+    }
+    /**
+     * Get the logging state, specified by the -log option.
+     * @return True if logging is enabled
+     */
+    public boolean getLogging() {
+        return options.log
+    }
+
     /**
      * Get the url to the remote database.  This is a required command
      * line option
@@ -78,8 +96,8 @@ public class ClomParser {
      * @return Database password login or null if none is given
      */
     public String getDbPassword() {
-        if (options.dbpassword)
-            return options.dbpassword
+        if (options.dbpwd)
+            return options.dbpwd
         return null
     }
 }
