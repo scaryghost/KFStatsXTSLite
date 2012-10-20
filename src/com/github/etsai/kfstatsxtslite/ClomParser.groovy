@@ -23,19 +23,24 @@ public class ClomParser {
         cli.dbpassword(args:1, argName:'pwd', 'login password for the database')
         cli.port(args:1, argName:'no', 'udp port to listen for stat packets')
         cli.h(longOpt:'help', 'displays this help message')
+        cli.v(longOpt:'version', 'prints the version and exits')
     }
     
     /**
      * Parse the command line arguments
      */
     public void parse(String[] args) {
+        if (args.contains("-v") || args.contains("--version")) {
+            println "KFStatsxTSLite - Version: ${Version.majorMinorStep}"
+            System.exit(0)
+        } else if (args.contains("-h") || args.contains("--help")) {
+            cli.usage()
+            System.exit(0)
+        }
+        
         options= cli.parse(args)
         if (options == null) {
             System.exit(1)
-        }
-        if (options.h) {
-            cli.usage()
-            System.exit(0)
         }
     }
     /**

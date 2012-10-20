@@ -83,4 +83,11 @@
         <fail unless="env.GROOVY_HOME">GROOVY_HOME env variable must be set</fail>
         <property name="user.properties.file" value="linux_build.properties" />
     </target>
+    
+    <target name="-pre-compile">
+        <taskdef name="describe" classname="com.github.etsai.utils.ant.taskdef.Describe" 
+                 classpath=" ${libs.etsaijavautils.classpath}"/>
+        <describe versionproperty="git.version" />
+        <replace file="${src.dir}/com/github/etsai/kfstatsxtslite/Version.java" token="@@@" value="${git.version}"/>
+    </target>
 </project>
