@@ -31,7 +31,7 @@ public class ClomParser {
      */
     public void parse(String[] args) {
         if (args.contains("-v") || args.contains("--version")) {
-            println "KFStatsxTSLite - Version: ${Version.majorMinorStep}"
+            println "KFStatsxTSLite - Version: ${Version.gitTag}"
             System.exit(0)
         } else if (args.contains("-h") || args.contains("--help")) {
             cli.usage()
