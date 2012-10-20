@@ -39,8 +39,8 @@ public class StatListenerMain {
         
         try {
             logWriter= TeeLogger.getFileWriter("kfstatsxtslite");
-            System.setOut(new PrintStream(new TeeLogger(logWriter, System.out)));
-            System.setErr(new PrintStream(new TeeLogger(logWriter, System.err)));
+            System.setOut(new PrintStream(new TeeLogger(logWriter, System.out), true));
+            System.setErr(new PrintStream(new TeeLogger(logWriter, System.err), true));
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
             System.err.println("Cannot create log file to store output");

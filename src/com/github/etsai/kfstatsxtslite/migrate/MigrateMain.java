@@ -4,7 +4,6 @@
  */
 package com.github.etsai.kfstatsxtslite.migrate;
 
-import com.github.etsai.utils.logging.TeeLogger;
 import com.github.etsai.utils.Time;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,30 +30,21 @@ public class MigrateMain {
             System.exit(1);
         }
         
-        FileWriter logWriter;
-        
-        try {
-            logWriter= TeeLogger.getFileWriter("migrate");
-            System.setOut(new PrintStream(new TeeLogger(logWriter, System.out)));
-            System.setErr(new PrintStream(new TeeLogger(logWriter, System.err)));
-        } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-            System.err.println("Cannot create log file to store output");
-        }
-        
-        System.out.println("Start data migration: " + Calendar.getInstance().getTime());
+        System.out.println("Starting data migration: " + Calendar.getInstance().getTime());
         Class.forName("org.sqlite.JDBC");
         Connection src= DriverManager.getConnection(args[0]);
         Connection dst= DriverManager.getConnection(args[1], args[2], args[3]);
         
+        long start= System.currentTimeMillis();
         move(src.createStatement(), dst.createStatement());
-        System.out.println("Data copied from " + args[0] + "to " + args[1]);
+        long end= System.currentTimeMillis();
+        System.out.println(String.format("Done: %1$.2f seconds", (end - start)/(double)1000));
     }
     
     static void move(Statement srcSt, Statement dstSt) throws SQLException {
         ResultSet rs;
         
-        System.out.println("Copying deaths...");
+        System.out.println("Copying deaths");
         rs= srcSt.executeQuery("select * from deaths");
         while(rs.next()) {
             dstSt.executeUpdate(String.format("insert into deaths values(NULL, '%s', %d);", 
@@ -62,7 +52,7 @@ public class MigrateMain {
         }
         rs.close();
         
-        System.out.println("Copying player records...");
+        System.out.println("Copying player records");
         rs= srcSt.executeQuery("select * from records");
         while(rs.next()) {
             dstSt.executeUpdate(String.format("insert into records values (NULL, '%s', %d, %d, %d);", 
@@ -70,7 +60,7 @@ public class MigrateMain {
         }
         rs.close();
         
-        System.out.println("Copying aggregate stats...");
+        System.out.println("Copying aggregate stats");
         rs= srcSt.executeQuery("select * from aggregate");
         while(rs.next()) {
             dstSt.executeUpdate(String.format("insert into aggregate values (NULL, '%s', %d, '%s');", 
@@ -78,7 +68,7 @@ public class MigrateMain {
         }
         rs.close();
         
-        System.out.println("Copying difficulties...");
+        System.out.println("Copying difficulties");
         rs= srcSt.executeQuery("select * from difficulties");
         while(rs.next()) {          
             Time time= new Time(rs.getString("time"));
@@ -88,7 +78,7 @@ public class MigrateMain {
         }
         rs.close();
         
-        System.out.println("Copying levels...");
+        System.out.println("Copying levels");
         rs= srcSt.executeQuery("select * from levels");
         while(rs.next()) {
             Time time= new Time(rs.getString("time"));
@@ -97,10 +87,9 @@ public class MigrateMain {
         }
         rs.close();
         
-        System.out.println("Copying player stats...");
+        System.out.println("Copying player stats");
         rs= srcSt.executeQuery("select * from player");
         while(rs.next()) {
-            System.out.println(String.format("SteamID64: %s, Category: %s", rs.getString("steamid"), rs.getString("category")));
             for(String statValue: rs.getString("stats").split(",")) {
                 String[] split= statValue.split("=");
                 dstSt.executeUpdate(String.format("insert into player values (NULL, '%s', '%s', %d, '%s');", 
