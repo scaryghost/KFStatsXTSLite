@@ -6,8 +6,11 @@ package com.github.etsai.kfstatsxtslite;
 
 import static com.github.etsai.kfstatsxtslite.StatMessage.Type.*;
 import com.github.etsai.kfstatsxtslite.message.*;
+import com.github.etsai.utils.logging.TeeLogger;
 import groovy.sql.Sql;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -30,8 +33,18 @@ public class StatListenerMain {
         ClomParser clom= new ClomParser();
         DatagramSocket socket;
         DatagramPacket packet;
+        FileWriter logWriter;
         
         clom.parse(args);
+        
+        try {
+            logWriter= TeeLogger.getFileWriter("kfstatsxtslite");
+            System.setOut(new PrintStream(new TeeLogger(logWriter, System.out)));
+            System.setErr(new PrintStream(new TeeLogger(logWriter, System.err)));
+        } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+            System.err.println("Cannot create log file to store output");
+        }
         
         Map<String, PlayerContent> receivedContent= new HashMap<>();
         StatWriter writer= new StatWriter(Sql.newInstance(clom.getDbURL(), clom.getDbUser(), clom.getDbPassword()));
