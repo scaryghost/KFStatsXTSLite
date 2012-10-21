@@ -87,14 +87,23 @@ INSERT INTO levels values (NULL, levelname, winDelta, lossDelta, timeDelta)
     time= time + timeDelta;
 END$$
 
-CREATE PROCEDURE `update_player_aggregate` 
-    (steamID64 VARCHAR(45), stat VARCHAR(45), offset INT UNSIGNED, category VARCHAR(45))
+CREATE PROCEDURE `update_player` (steamID64 VARCHAR(45), stat VARCHAR(45), offset INT UNSIGNED, category VARCHAR(45))
 BEGIN
 INSERT INTO player values (NULL, steamID64, stat, offset, category)
     ON DUPLICATE KEY UPDATE value= value + offset;
 
+END$$
+
+CREATE PROCEDURE `update_aggregate` (stat VARCHAR(45), offset INT UNSIGNED, category VARCHAR(45))
+BEGIN
 INSERT INTO aggregate values (NULL, stat, offset, category)
     ON DUPLICATE KEY UPDATE value= value + offset;
+END$$
+
+CREATE PROCEDURE `update_player_aggregate` (steamID64 VARCHAR(45), stat VARCHAR(45), offset INT UNSIGNED, category VARCHAR(45))
+BEGIN
+call update_player(steamID64, stat, offset, category);
+call update_aggregate(stat, offset, category);
 END$$
 
 CREATE PROCEDURE `update_record` 

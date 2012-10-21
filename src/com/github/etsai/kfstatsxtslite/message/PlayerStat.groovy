@@ -29,20 +29,28 @@ public class PlayerStat extends StatMessage {
             return [level, difficulty, length, wave, result].toString()
         }
     }
-    
+   
+    /** Protocol name for player stats */ 
     public static String PROTOCOL= "kfstatsx-player"
+    /** Current protocol version */
     public static Integer VERSION= 1
+    /** Offset for converting between linux and windows steamID64 */
     public static Long linuxOffset= 76561197960265728
     
     private final def steamID64
     private final def category
     private final def matchInfo
     
+    /**
+     * Constructs object given the pipe separated string of stat information
+     */
     public PlayerStat(def parts) {
         super((parts[3] == "match") ? "" : parts[4])
         
         steamID64= parts[1]
-        if (steamID64.length() < 17) {
+        if (steamID64 == "") {
+            steamID64= null
+        } else if (steamID64.length() < 17) {
             steamID64= (steamID64.toLong() + linuxOffset).toString()
         }
         category= parts[3]
@@ -67,18 +75,32 @@ public class PlayerStat extends StatMessage {
         }
     }
     
+    /**
+     * Get the steamID64 of the player stat.  If the field was blank, null is returned
+     * @return SteamID64 or null if blank
+     */
     public String getSteamID64() {
         return steamID64
     }
-    
+    /**
+     * Get the stat category the set of stats belong to
+     * @return Stat category
+     */
     public String getCategory() {
         return category
     }
-    
+    /**
+     * Get match information stored by the stat packet.  If category is not "match", null is returned
+     * @return Match information, or null if packet is not in the "match" category
+     */
     public MatchInfo getMatchInfo() {
         return matchInfo
     }
 
+    /**
+     * Generate string representation of the object
+     * @return String representation
+     */
     @Override
     public String toString() {
         def attrs= [steamID64, seqNo, category,]

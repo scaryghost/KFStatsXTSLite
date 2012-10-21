@@ -47,7 +47,7 @@ public class MigrateMain {
         System.out.println("Copying deaths");
         rs= srcSt.executeQuery("select * from deaths");
         while(rs.next()) {
-            dstSt.executeUpdate(String.format("insert into deaths values(NULL, '%s', %d);", 
+            dstSt.executeUpdate(String.format("call update_deaths '%s', %d);", 
                     rs.getString("name"), rs.getInt("count")));
         }
         rs.close();
@@ -55,7 +55,7 @@ public class MigrateMain {
         System.out.println("Copying player records");
         rs= srcSt.executeQuery("select * from records");
         while(rs.next()) {
-            dstSt.executeUpdate(String.format("insert into records values (NULL, '%s', %d, %d, %d);", 
+            dstSt.executeUpdate(String.format("call update_record('%s', %d, %d, %d);", 
                     rs.getString("steamid"), rs.getInt("wins"), rs.getInt("losses"), rs.getInt("disconnects")));
         }
         rs.close();
@@ -63,7 +63,7 @@ public class MigrateMain {
         System.out.println("Copying aggregate stats");
         rs= srcSt.executeQuery("select * from aggregate");
         while(rs.next()) {
-            dstSt.executeUpdate(String.format("insert into aggregate values (NULL, '%s', %d, '%s');", 
+            dstSt.executeUpdate(String.format("call update_aggregate('%s', %d, '%s');", 
                     rs.getString("stat"), rs.getInt("value"), rs.getString("category")));
         }
         rs.close();
@@ -72,7 +72,7 @@ public class MigrateMain {
         rs= srcSt.executeQuery("select * from difficulties");
         while(rs.next()) {          
             Time time= new Time(rs.getString("time"));
-            dstSt.executeUpdate(String.format("insert into difficulties values (NULL, '%s', '%s', %d, %d, %d, %d);", 
+            dstSt.executeUpdate(String.format("call update_difficulty('%s', '%s', %d, %d, %d, %d);", 
                     rs.getString("name"), rs.getString("length"), rs.getInt("wins"), rs.getInt("losses"), 
                     rs.getInt("wave"), time.toSeconds()));
         }
@@ -82,7 +82,7 @@ public class MigrateMain {
         rs= srcSt.executeQuery("select * from levels");
         while(rs.next()) {
             Time time= new Time(rs.getString("time"));
-            dstSt.executeUpdate(String.format("insert into levels values (NULL, '%s', %d, %d, %d);", 
+            dstSt.executeUpdate(String.format("call update_level('%s', %d, %d, %d);", 
                     rs.getString("name"), rs.getInt("wins"), rs.getInt("losses"), time.toSeconds()));
         }
         rs.close();
@@ -92,7 +92,7 @@ public class MigrateMain {
         while(rs.next()) {
             for(String statValue: rs.getString("stats").split(",")) {
                 String[] split= statValue.split("=");
-                dstSt.executeUpdate(String.format("insert into player values (NULL, '%s', '%s', %d, '%s');", 
+                dstSt.executeUpdate(String.format("call update_player('%s', '%s', %d, '%s');", 
                         rs.getString("steamid"), split[0], Integer.valueOf(split[1]), rs.getString("category")));
             }
         }

@@ -34,8 +34,15 @@ public class StatWriter {
         sql.execute("call update_level(${stat.getLevelName()}, $wins, $losses, ${stat.getElapsedTime()})")
     }
     
+    public void writeBlankPlayerStat(PlayerStat stat) {
+        stat.getStats().each {name, offset ->
+            sql.execute("call update_aggregate(?, ?, ?)", [
+                name, offset, category
+            ])
+        }
+    }
+
     public void writePlayerStat(Iterable<PlayerStat> stats) {
-        def start= System.nanoTime()
         stats.each {stat ->
             def id= stat.getSteamID64()
             def category= stat.getCategory()
@@ -60,7 +67,6 @@ public class StatWriter {
                 ])
             }
         }
-        println System.nanoTime() - start
     }
 }
 
