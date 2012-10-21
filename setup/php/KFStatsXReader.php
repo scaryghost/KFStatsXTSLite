@@ -3,44 +3,63 @@
 class KFStatsXReader {
     private $dbConn;
 
-    function __construct($url, $table, $user, $pwd) {
-        $this->dbConn= mysql_connect($url, $user, $pwd);
-        if (!$this->dbConn) {
-            die('Could not connect: ' . mysql_error());
+    function __construct($address, $database, $user, $password) {
+        $this->dbConn= new mysqli($address, $user, $password, $database);
+        if ($this->dbConn->connect_errno) {
+            echo "Failed to connect to MySQL: (" . $this->dbConn->connect_errno . ") " . $this->dbConn->connect_error;
         }
-        mysql_select_db($table, $this->dbConn);
     }
 
-    private function query($columns, $sql) {
+    private function query($table, $constraints= '') {
         $index= 0;
         $stats= array();
 
-        $result= mysql_query($sql);
-        while($row= mysql_fetch_array($result)) {
-            $values= array();
-            foreach($columns as $col) {
-                $values[$col]= $row[$col];
-            }
-            $stats[$index]= $values;
+        $sql= "SELECT * FROM " . $table ;
+        if ($constraints !== '') {
+            $sql= $sql . " WHERE " . $constraints;
+        }
+        $sql= $sql . " ORDER BY id ASC";
+        $result= $this->dbConn->query($sql);
+        while ($row = $result->fetch_assoc()) {
+            $stats[$index]= $row;
             $index++;
         }
         return $stats;
     }
 
     function getDeaths() {
-        return $this->query(array("name", "count"), "SELECT * FROM deaths");
-    }
-
-    function getAggregate() {
-        return $this->query(array("category", "stat", "value"), "SELECT * FROM aggregate");
+        return $this->query("deaths");
     }
 
     function getDifficulties() {
-        return $this->query(array("name", "length", "wins", "losses", "wave", "time"), "SELECT * FROM diffficulties");
+        return $this->query("difficulties");
     }
 
     function getLevels() {
-        return $this->query(array("name", "wins", "losses", "time"), "SELECT * FROM levels");
+        return $this->query("levels");
+    }
+
+    function getAggregate() {
+        return $this->query("aggregate");
+    }
+    function getSteamID64() {
+        return $this->query("records");
+    }
+
+    function getPlayerStats($steamID64) {
+        return $this->query("player", "steamID64='" . $steamID64 . "'");
+    }
+
+    function getSessions($steamID64) {
+        return $this->query("sessions", "steamID64='" . $steamID64 . "'");
+    }
+
+    function getRecords() {
+        return $this->query("records");
+    }
+
+    function getRecord($steamID64) {
+        return $this->query("records", "steamID64='" . $steamID64 . "'");
     }
 }
 
