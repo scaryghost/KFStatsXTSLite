@@ -10,7 +10,7 @@ class KFStatsXReader {
         }
     }
 
-    private function query($table, $constraints= '') {
+    private function query($table, $order, $constraints= '') {
         $index= 0;
         $stats= array();
 
@@ -18,7 +18,7 @@ class KFStatsXReader {
         if ($constraints !== '') {
             $sql= $sql . " WHERE " . $constraints;
         }
-        $sql= $sql . " ORDER BY id ASC";
+        $sql= $sql . " ORDER BY " . $order . " ASC";
         $result= $this->dbConn->query($sql);
         while ($row = $result->fetch_assoc()) {
             $stats[$index]= $row;
@@ -28,38 +28,38 @@ class KFStatsXReader {
     }
 
     function getDeaths() {
-        return $this->query("deaths");
+        return $this->query("deaths", "name");
     }
 
     function getDifficulties() {
-        return $this->query("difficulties");
+        return $this->query("difficulties", "name, length");
     }
 
     function getLevels() {
-        return $this->query("levels");
+        return $this->query("levels", "name");
     }
 
     function getAggregate() {
-        return $this->query("aggregate");
+        return $this->query("aggregate", "category, stat");
     }
     function getSteamID64() {
-        return $this->query("records");
+        return $this->query("records", "id");
     }
 
     function getPlayerStats($steamID64) {
-        return $this->query("player", "steamID64='" . $steamID64 . "'");
+        return $this->query("player", "category, stat", "steamID64='" . $steamID64 . "'");
     }
 
     function getSessions($steamID64) {
-        return $this->query("sessions", "steamID64='" . $steamID64 . "'");
+        return $this->query("sessions", "id", "steamID64='" . $steamID64 . "'");
     }
 
     function getRecords() {
-        return $this->query("records");
+        return $this->query("records", "id");
     }
 
     function getRecord($steamID64) {
-        return $this->query("records", "steamID64='" . $steamID64 . "'");
+        return $this->query("records", "id", "steamID64='" . $steamID64 . "'");
     }
 }
 
