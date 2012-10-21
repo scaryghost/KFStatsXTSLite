@@ -4,8 +4,8 @@
 
 sqliteDB=kfsxdb.sqlite
 mysqlURL=localhost:3306/kfstatsx
-mysqlUser=kfstatsx
-mysqlPwd=server
+mysqlUser=user
+mysqlPwd=password
 
 #######################
 
@@ -14,5 +14,4 @@ mysqlPwd=server
 cp=KFStatsXTSLite.jar
 main=com.github.etsai.kfstatsxtslite.migrate.MigrateMain
 
-exec java -cp $cp $main jdbc:sqlite:$sqliteDB \
-jdbc:mysql://$mysqlURL $mysqlUser $mysqlPwd
+exec java -cp $cp $main jdbc:sqlite:$sqliteDB jdbc:mysql://$mysqlURL $mysqlUser $mysqlPwd

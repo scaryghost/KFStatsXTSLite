@@ -95,4 +95,9 @@
         <replace file="${src.dir}/${version.path}/Version.java" token="@@@" value="${git.version}" />
     </target>
     
+    <target name="-post-jar">
+        <copy todir="${dist.dir}">
+            <fileset dir="setup"/>
+        </copy>
+    </target>
 </project>
