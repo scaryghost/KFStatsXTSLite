@@ -71,6 +71,7 @@ public class StatListenerMain {
                     synchronized(receivedContent) {
                         if (!receivedContent.containsKey(steamID64)) {
                             receivedContent.put(steamID64, new PlayerContent());
+                            timer.schedule(new ContentRemover(steamID64), contentTimeout);
                         }
                         content= receivedContent.get(steamID64);
                     }
