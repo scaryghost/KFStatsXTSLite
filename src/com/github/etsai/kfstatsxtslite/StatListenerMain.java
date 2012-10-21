@@ -14,6 +14,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -54,13 +55,19 @@ public class StatListenerMain {
         DatagramSocket socket= new DatagramSocket(clom.getPort());
         DatagramPacket packet= new DatagramPacket(buffer, buffer.length);
         Timer timer= new Timer();
+        boolean verbose= clom.getVerbose();
         
+        System.out.println("Verbose mode: " + verbose);
+        System.out.println("Server started: " + Calendar.getInstance().getTime());
         System.out.println("Listening on port: "+clom.getPort());
         while(true) {
             try {
                 socket.receive(packet);
                 StatMessage msg= StatMessage.parse(new String(packet.getData(), 0, packet.getLength()));
                 
+                if (verbose) {
+                    System.out.println("Received stat message: " + msg);
+                }
                 if (msg instanceof MatchStat) {
                     writer.writeMatchStat((MatchStat)msg);
                 } else if (msg instanceof PlayerStat) {
@@ -101,7 +108,7 @@ public class StatListenerMain {
         public void run() {
             synchronized(receivedContent) {
                 if (receivedContent.containsKey(steamID64)) {
-                    System.out.println(String.format("Player content for steamID64: %s not completed within %dms.  Removing", 
+                    System.out.println(String.format("Removing player content for steamID64: %s, not completed within %dms", 
                         steamID64, contentTimeout));
                     receivedContent.remove(steamID64);
                 }

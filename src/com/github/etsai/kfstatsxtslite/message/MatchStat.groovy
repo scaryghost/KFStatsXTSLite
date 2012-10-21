@@ -70,5 +70,10 @@ public class MatchStat extends StatMessage {
     public int getWave() {
         return wave
     }
+
+    @Override
+    public String toString() {
+        return [levelName, difficulty, length, result, wave, elapsedTime]
+    }
 }
 

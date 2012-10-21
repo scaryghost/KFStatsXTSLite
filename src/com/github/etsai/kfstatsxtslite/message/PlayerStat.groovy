@@ -22,6 +22,12 @@ public class PlayerStat extends StatMessage {
         public def length
         public def wave
         public def result
+
+    
+        @Override
+        public String toString() {
+            return [level, difficulty, length, wave, result].toString()
+        }
     }
     
     public static String PROTOCOL= "kfstatsx-player"
@@ -71,6 +77,15 @@ public class PlayerStat extends StatMessage {
     
     public MatchInfo getMatchInfo() {
         return matchInfo
+    }
+
+    @Override
+    public String toString() {
+        def attrs= [steamID64, seqNo, category,]
+        if (matchInfo == null) {
+            return attrs << stats
+        }
+        return attrs << matchInfo
     }
 }
 

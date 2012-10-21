@@ -17,22 +17,23 @@ public class ClomParser {
      * Default constructor
      */
     public ClomParser() {
-        cli= new CliBuilder(usage: 'java -jar dist/KFStatsXTSLite.jar [options]')
+        cli= new CliBuilder(usage: 'java -jar KFStatsXTSLite.jar [options]')
         cli.dburl(args:1, argName:'url', required:true, 'url to the remote database')
         cli.dbuser(args:1, argName:'name', 'user name to log into the database')
         cli.dbpwd(args:1, argName:'password', 'login password for the database')
         cli.port(args:1, argName:'no', 'udp port to listen for stat packets')
         cli.h(longOpt:'help', 'displays this help message')
-        cli.v(longOpt:'version', 'prints the version and exits')
+        cli._(longOpt:'version', 'prints the version and exits')
         cli.pwd(args:1, argName:'password', required:true, 'password that udp packets must have to be accepted by the server')
         cli.log('enable logging')
+        cli.v('Verbose mode')
     }
     
     /**
      * Parse the command line arguments
      */
     public void parse(String[] args) {
-        if (args.contains("-v") || args.contains("--version")) {
+        if (args.contains("--version")) {
             println "KFStatsXTSLite - Version: ${Version.gitTag}"
             System.exit(0)
         } else if (args.contains("-h") || args.contains("--help")) {
@@ -70,6 +71,13 @@ public class ClomParser {
      */
     public boolean getLogging() {
         return options.log
+    }
+    /**
+     * Get verbose mode, specificed by -v options
+     * @return True if verbose mode is set
+     */
+    public boolean getVerbose() {
+        return options.v
     }
 
     /**
