@@ -47,7 +47,7 @@ public class MigrateMain {
         System.out.println("Copying deaths");
         rs= srcSt.executeQuery("select * from deaths");
         while(rs.next()) {
-            dstSt.executeUpdate(String.format("call update_deaths '%s', %d);", 
+            dstSt.executeUpdate(String.format("call update_deaths('%s', %d);", 
                     rs.getString("name"), rs.getInt("count")));
         }
         rs.close();
