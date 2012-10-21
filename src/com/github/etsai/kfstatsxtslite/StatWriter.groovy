@@ -35,6 +35,7 @@ public class StatWriter {
     }
     
     public void writeBlankPlayerStat(PlayerStat stat) {
+        def category= stat.getCategory()
         stat.getStats().each {name, offset ->
             sql.execute("call update_aggregate(?, ?, ?)", [
                 name, offset, category
