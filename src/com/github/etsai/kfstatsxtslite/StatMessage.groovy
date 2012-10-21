@@ -22,11 +22,14 @@ public abstract class StatMessage {
     protected def close
     protected def stats
     
-    public static StatMessage parse(String msg) {
+    public static StatMessage parse(String msg, String password) {
         def parts= msg.split("\\|")
-        def packetInfo= parts[0].tokenize(",")
+        def packetInfo= parts[0].split(",")
         def message
         
+        if (packetInfo[2] != password) {
+            throw new RuntimeException("Invalid password given, ignoring packet: ${msg}")
+        }
         switch (packetInfo[0]) {
             case PlayerStat.PROTOCOL:
                 if (packetInfo[1].toInteger() != PlayerStat.VERSION)

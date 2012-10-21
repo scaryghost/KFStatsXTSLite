@@ -11,13 +11,13 @@ package com.github.etsai.kfstatsxtslite
  */
 public class ClomParser {
     private def options;
-    private def cli;
     
     /**
-     * Default constructor
+     * Constructs object given the list of command lin arguments
+     * @param   args    Command line arguments
      */
-    public ClomParser() {
-        cli= new CliBuilder(usage: 'java -jar KFStatsXTSLite.jar [options]')
+    public ClomParser(String[] args) {
+        def cli= new CliBuilder(usage: 'java -jar KFStatsXTSLite.jar [options]')
         cli.dburl(args:1, argName:'url', required:true, 'url to the remote database')
         cli.dbuser(args:1, argName:'name', 'user name to log into the database')
         cli.dbpwd(args:1, argName:'password', 'login password for the database')
@@ -27,12 +27,7 @@ public class ClomParser {
         cli.pwd(args:1, argName:'password', required:true, 'password that udp packets must have to be accepted by the server')
         cli.log('enable logging')
         cli.v('Verbose mode')
-    }
-    
-    /**
-     * Parse the command line arguments
-     */
-    public void parse(String[] args) {
+
         if (args.contains("--version")) {
             println "KFStatsXTSLite - Version: ${Version.gitTag}"
             System.exit(0)

@@ -34,35 +34,32 @@ public class StatListenerMain {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        ClomParser clom= new ClomParser();
+        ClomParser clom= new ClomParser(args);
         
-        clom.parse(args);
-        if (clom.getLogging()) {
-            try {
-                logWriter= TeeLogger.getFileWriter("kfstatsxtslite");
-                System.setOut(new PrintStream(new TeeLogger(logWriter, System.out), true));
-                System.setErr(new PrintStream(new TeeLogger(logWriter, System.err), true));
-                System.out.println("Logging enabled");
-            } catch (IOException ex) {
-                System.err.println(ex.getMessage());
-                System.err.println("Cannot create log file to store output");
-            }
-        } else {
-            System.out.println("Logging disabled");
-        }
-        
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                System.out.println("Server shutting down: " + Calendar.getInstance().getTime());
-            }
-        });
-
         try {
+            if (clom.getLogging()) {
+                try {
+                    logWriter= TeeLogger.getFileWriter("kfstatsxtslite");
+                    System.setOut(new PrintStream(new TeeLogger(logWriter, System.out), true));
+                    System.setErr(new PrintStream(new TeeLogger(logWriter, System.err), true));
+                } catch (IOException ex) {
+                    System.err.println(ex.getMessage());
+                    System.err.println("Cannot create log file to store output");
+                }
+            }
+        
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    System.out.println("Server shutting down: " + Calendar.getInstance().getTime());
+                }
+            });
+
             writer= new StatWriter(Sql.newInstance(clom.getDbURL(), clom.getDbUser(), clom.getDbPassword()));
             System.out.println("Server started: " + Calendar.getInstance().getTime());
+            System.out.println("Logging: " + clom.getLogging());
 
-            startServer(new DatagramSocket(clom.getPort()), clom.getVerbose());
+            startServer(new DatagramSocket(clom.getPort()), clom.getServerPassword(), clom.getVerbose());
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
             System.err.println("Error connecting to the MySql database");
@@ -75,7 +72,7 @@ public class StatListenerMain {
 
     }
 
-    public static void startServer(DatagramSocket socket, boolean verbose) throws SocketException {
+    public static void startServer(DatagramSocket socket, String password, boolean verbose) throws SocketException {
         byte[] buffer= new byte[65536];
         DatagramPacket packet= new DatagramPacket(buffer, buffer.length);
         Timer timer= new Timer();
@@ -85,7 +82,7 @@ public class StatListenerMain {
         while(true) {
             try {
                 socket.receive(packet);
-                StatMessage msg= StatMessage.parse(new String(packet.getData(), 0, packet.getLength()));
+                StatMessage msg= StatMessage.parse(new String(packet.getData(), 0, packet.getLength()), password);
                 
                 if (verbose) {
                     System.out.println("Received stat message: " + msg);
