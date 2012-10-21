@@ -27,12 +27,13 @@ import java.util.TimerTask;
 public class StatListenerMain {
     private static final Map<String, PlayerContent> receivedContent= new HashMap<>();
     private static FileWriter logWriter;
+    private static StatWriter writer;
     private static long contentTimeout= 60000;
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws SocketException, SQLException {
+    public static void main(String[] args) {
         ClomParser clom= new ClomParser();
         
         clom.parse(args);
@@ -50,16 +51,37 @@ public class StatListenerMain {
             System.out.println("Logging disabled");
         }
         
-        StatWriter writer= new StatWriter(Sql.newInstance(clom.getDbURL(), clom.getDbUser(), clom.getDbPassword()));
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                System.out.println("Server shutting down: " + Calendar.getInstance().getTime());
+            }
+        });
+
+        try {
+            writer= new StatWriter(Sql.newInstance(clom.getDbURL(), clom.getDbUser(), clom.getDbPassword()));
+            System.out.println("Server started: " + Calendar.getInstance().getTime());
+
+            startServer(new DatagramSocket(clom.getPort()), clom.getVerbose());
+        } catch (SQLException ex) {
+            System.err.println(ex.getMessage());
+            System.err.println("Error connecting to the MySql database");
+            System.exit(2);
+        } catch (SocketException ex) {
+            System.err.println(ex.getMessage());
+            System.err.println("Error starting server on port: " + clom.getPort());
+            System.exit(3);
+        }
+
+    }
+
+    public static void startServer(DatagramSocket socket, boolean verbose) throws SocketException {
         byte[] buffer= new byte[65536];
-        DatagramSocket socket= new DatagramSocket(clom.getPort());
         DatagramPacket packet= new DatagramPacket(buffer, buffer.length);
         Timer timer= new Timer();
-        boolean verbose= clom.getVerbose();
-        
+
         System.out.println("Verbose mode: " + verbose);
-        System.out.println("Server started: " + Calendar.getInstance().getTime());
-        System.out.println("Listening on port: "+clom.getPort());
+        System.out.println("Listening on port: " + socket.getLocalPort());
         while(true) {
             try {
                 socket.receive(packet);
