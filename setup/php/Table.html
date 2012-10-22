@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+    <script type="text/javascript" src="jquery-1.8.2.js"></script>
+    <script type='text/javascript'>
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      function drawTable() {
+          var jsonData = $.ajax({
+              url: "tableData.php",
+              dataType:"json",
+              async: false
+              }).responseText;
+          
+          // Create our data table out of JSON data loaded from server.
+          var data = new google.visualization.DataTable(jsonData);
+
+          // Instantiate and draw our table, passing in some options.
+          var table = new google.visualization.Table(document.getElementById('table_div'));
+          table.draw(data, {width: 1368, height: 768, title:'Levels', allowHtml: true});
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id='table_div'></div>
+  </body>
+</html>
