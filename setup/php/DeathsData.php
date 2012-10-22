@@ -1,6 +1,6 @@
 <?php
-require 'KFStatsXReader.php';
-require 'MySqlInfo.php';
+require_once 'KFStatsXReader.php';
+require_once 'MySqlInfo.php';
 
 $reader= new KFStatsXReader(MySqlInfo::$dbAddress, MySqlInfo::$dbName, MySqlInfo::$dbUser, MySqlInfo::$dbPwd);
 $jsonData= array();

@@ -52,7 +52,7 @@ class KFStatsXReader {
      * @return  Array containing the death names and counts.
      */
     function getDeaths() {
-        return $this->query("deaths", "name");
+        return $this->query("deaths", "count");
     }
 
     /**
